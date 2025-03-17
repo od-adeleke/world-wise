@@ -10,6 +10,7 @@ import PageNotFound from './pages/PageNotFound'
 import CityList from './components/CityList'
 import CountryList from './components/CountryList'
 import City from './components/City'
+import Form from './components/Form'
 
 import './App.css'
 
@@ -72,7 +73,7 @@ function App() {
               />
             } 
           />
-          <Route path="form" element={<p>Form</p>} />
+          <Route path="form" element={<Form />} />
         </Route>
         <Route path="login" element={<Login />} />
         <Route path="*" element={<PageNotFound />} />
