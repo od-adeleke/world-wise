@@ -1,5 +1,6 @@
 import {useState} from 'react'
 import {useNavigate} from 'react-router-dom'
+import {useUrlPosition} from '../hooks/useUrlPosition'
 
 import Button from './Button'
 import BackButton from './BackButton'
@@ -15,6 +16,7 @@ const Form = () => {
   const [country, setCountry] = useState('')
   const [date, setDate] = useState(new Date())
   const [notes, setNotes] = useState('')
+  const [mapLat, mapLng]= useUrlPosition()
 
   const navigate = useNavigate()
 
