@@ -13,11 +13,11 @@ const Map = () => {
   const [mapPosition, setMapPosition]= useState([40, 0])
   const {cities, currentCity}= useCities()
   const { isLoading: isLoadingPosition, position:geolocationPosition, getPosition }= useGeolocation()
-  const [mapLat, mapLng]= useUrlPosition()
+  const [lat, lng]= useUrlPosition()
 
   useEffect(()=> {
-    if(mapLat && mapLng) setMapPosition([mapLat, mapLng])
-  }, [mapLat, mapLng])
+    if(lat && lng) setMapPosition([lat, lng])
+  }, [lat, lng])
 
   useEffect(()=> {
     if(geolocationPosition) setMapPosition([geolocationPosition.lat, geolocationPosition.lng])

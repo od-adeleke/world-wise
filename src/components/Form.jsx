@@ -1,5 +1,4 @@
-import {useState} from 'react'
-import {useNavigate} from 'react-router-dom'
+import {useState, useEffect} from 'react'
 import {useUrlPosition} from '../hooks/useUrlPosition'
 
 import Button from './Button'
@@ -11,21 +10,53 @@ export function convertToEmoji(countryCode) {
   return String.fromCodePoint(...codePoints)
 }
 
+const BASE_URL= "https://api.bigdatacloud.net/data/reverse-geocode-client"
+
 const Form = () => {
   const [cityName, setCityName] = useState('')
   const [country, setCountry] = useState('')
   const [date, setDate] = useState(new Date())
   const [notes, setNotes] = useState('')
-  const [mapLat, mapLng]= useUrlPosition()
+  
+  const [lat, lng]= useUrlPosition()
+  const [isLoadingGeocoding, setIsLoadingGeocoding]= useState(false)
+  const [emoji, setEmoji]= useState('')
 
-  const navigate = useNavigate()
+  useEffect(()=> {
+    async function fetchCityData() {
+        try {
+          setIsLoadingGeocoding(true);
+          // setGeocodingError("");
+
+          const res = await fetch(
+            `${BASE_URL}?latitude=${lat}&longitude=${lng}`
+          );
+          const data = await res.json();
+
+          if (!data.countryCode)
+            throw new Error(
+              "That doesn't seem to be a city. Click somewhere else 😉"
+            );
+
+          setCityName(data.city || data.locality || "");
+          setCountry(data.countryName);
+          setEmoji(convertToEmoji(data.countryCode));
+        } catch (err) {
+          console.log(err.message);
+          // setGeocodingError(err.message);
+        } finally {
+          setIsLoadingGeocoding(false);
+        }
+      }
+    fetchCityData()
+  }, [lat, lng])
 
   return (
     <form className={styles.form}>
       <div className={styles.row}>
         <label htmlFor='cityName'>City name</label>
         <input id='cityName' onChange={(e)=> setCityName(e.target.value)} value={cityName} />
-        {/* <span className={styles.flag}>{emoji}</span> */}
+        <span className={styles.flag}>{emoji}</span>
       </div>
 
       <div className={styles.row}>
