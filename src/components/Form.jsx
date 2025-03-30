@@ -1,10 +1,16 @@
 import {useState, useEffect} from 'react'
+import { useNavigate } from "react-router-dom";
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+
+import {useCities} from '../contexts/CitiesContext'
 import {useUrlPosition} from '../hooks/useUrlPosition'
 
 import Button from './Button'
 import Spinner from './Spinner'
 import Message from './Message'
 import BackButton from './BackButton'
+
 import styles from './Form.module.css'
 
 export function convertToEmoji(countryCode) {
@@ -19,11 +25,14 @@ const Form = () => {
   const [country, setCountry] = useState('')
   const [date, setDate] = useState(new Date())
   const [notes, setNotes] = useState('')
-  
-  const [lat, lng]= useUrlPosition()
   const [isLoadingGeocoding, setIsLoadingGeocoding]= useState(false)
   const [emoji, setEmoji]= useState('')
   const [geoCodingError, setGeocodingError]= useState('')
+
+  const [lat, lng]= useUrlPosition()
+  const {createCity}= useCities()
+
+  const navigate= useNavigate()
 
   useEffect(()=> {
     if(!lat && !lng) return;
@@ -55,12 +64,29 @@ const Form = () => {
     fetchCityData()
   }, [lat, lng])
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
+
+    // don't sumbit without city name or date
+    if(!cityName || !date) return
+
+    const newCity= {
+      cityName,
+      country,
+      emoji,
+      date,
+      notes,
+      position: {lat, lng}
+    }
+    
+    await createCity(newCity)
+    // console.log(newCity)
+    navigate("/app/cities");
   }
 
   if(isLoadingGeocoding) return <Spinner />
   if(geoCodingError) return <Message message={geoCodingError} />
+  // to prevent the user from accessing the form through the url only
   if(!lat && !lng) return <Message message="Start by clicking somewhere on the map" />
 
   return (
@@ -79,15 +105,15 @@ const Form = () => {
         <label htmlFor='date'>
           When did you go to {cityName}?
         </label>
-        <input 
-          id='date' 
-          onChange={(e)=> setDate(e.target.value)} 
-          value={date} 
-        />
+        <DatePicker 
+          onChange={date=> setDate(date)} 
+          selected={date} // 'selected' prop here does the same work as 'value' prop
+          dateFormat='dd/MM/yyyy' 
+          id='date' />
       </div>
 
       <div className={styles.row}>
-        <label htmlFor='date'>
+        <label htmlFor='notes'>
           Notes about your trip to {cityName}
         </label>
         <textarea 
